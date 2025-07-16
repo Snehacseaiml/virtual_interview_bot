@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resume & Cover Letter Review</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+        }
+        .main-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .review-card {
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.10);
+            padding: 36px 32px 28px 32px;
+            max-width: 480px;
+            width: 100%;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .review-title {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #764ba2;
+            margin-bottom: 10px;
+        }
+        .review-desc {
+            color: #555;
+            font-size: 1.05rem;
+            margin-bottom: 18px;
+        }
+        .file-input {
+            margin-bottom: 18px;
+        }
+        .file-input input[type="file"] {
+            padding: 8px;
+            border-radius: 8px;
+            border: 1.5px solid #e1e5e9;
+            background: #fff;
+            font-size: 1rem;
+        }
+        .submit-btn {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            padding: 12px 32px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.10);
+            margin-bottom: 10px;
+        }
+        .submit-btn:hover {
+            background: #e60000;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(253, 29, 29, 0.18);
+        }
+        .feedback-section {
+            margin-top: 18px;
+            background: #f8fafc;
+            border-radius: 18px;
+            padding: 18px 14px;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.06);
+            text-align: left;
+        }
+        .feedback-section h3 {
+            color: #764ba2;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+        .feedback-section .error {
+            color: #e53935;
+            font-weight: 700;
+        }
+        .feedback-section .preview {
+            background: #e3f0fc;
+            color: #222;
+            border-radius: 12px;
+            font-size: 0.98rem;
+            margin-top: 10px;
+            padding: 10px 12px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-top: 18px;
+            background: rgba(35, 37, 38, 0.9);
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            padding: 10px 22px;
+            font-size: 1rem;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .back-btn:hover {
+            background: #3a1c71;
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="review-card">
+            <div class="review-title">Resume & Cover Letter Review</div>
+            <div class="review-desc">Upload your resume or cover letter (PDF, DOCX, or TXT) for instant AI-powered feedback and a quick preview.</div>
+            <form method="POST" enctype="multipart/form-data">
+                <div class="file-input">
+                    <input type="file" name="resume" accept=".pdf,.docx,.txt" required />
+                </div>
+                <button type="submit" class="submit-btn">Get Feedback</button>
+            </form>
+            {% if feedback %}
+            <div class="feedback-section">
+                <h3>Feedback:</h3>
+                {% if feedback.error %}
+                    <div class="error">{{ feedback.error }}</div>
+                {% else %}
+                    <div><b>Word Count:</b> {{ feedback.word_count }}</div>
+                    <div><b>Sentiment:</b> {{ feedback.sentiment }}</div>
+                    <div><b>Grammar Issues:</b> {{ feedback.grammar_issues }}</div>
+                    <div><b>AI Comment:</b> {{ feedback.sample_feedback }}</div>
+                    <div class="preview"><b>Preview:</b><br>{{ feedback.preview }}</div>
+                {% endif %}
+            </div>
+            {% endif %}
+            <a href="/" class="back-btn">← Back to Home</a>
+        </div>
+    </div>
+</body>
+</html> 

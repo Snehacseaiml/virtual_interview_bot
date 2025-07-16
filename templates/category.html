@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select Category</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 25%, #0f3460 50%, #533483 75%, #7209b7 100%);
+            /* Animated gradient background */
+            overflow: hidden;
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+        }
+        .background-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #1a1a2e, #16213e, #0f3460, #533483, #7209b7);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            z-index: 0;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        .main-container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 10px;
+        }
+        .category-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.10);
+            padding: 20px 8px 18px 8px;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 1s ease-out 0.5s forwards;
+        }
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 28px;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+        .mode-select {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 16px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 14px;
+            background: rgba(240, 147, 251, 0.08);
+            border-radius: 18px;
+            padding: 10px 6px 6px 6px;
+        }
+        .mode-select label {
+            font-weight: 600;
+            color: #764ba2;
+            margin-right: 6px;
+        }
+        .mode-select select, .mode-select input[type="checkbox"] {
+            font-size: 1rem;
+            border-radius: 8px;
+            border: 1.5px solid #e1e5e9;
+            padding: 6px 12px;
+            margin-right: 10px;
+            background: #fff;
+            transition: border 0.2s;
+        }
+        .mode-select select:focus {
+            border: 1.5px solid #764ba2;
+            outline: none;
+        }
+        .mode-select input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #fd1d1d;
+            margin-right: 4px;
+        }
+        .mode-select .challenge-label {
+            font-weight: 600;
+            color: #fd1d1d;
+            margin-left: 2px;
+        }
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 6px;
+            margin: 0 0 4px 0;
+        }
+        .cat-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border: none;
+            border-radius: 18px;
+            padding: 16px 8px 12px 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(.4,2,.3,1);
+            min-height: 70px;
+            box-shadow: 0 2px 10px rgba(102,126,234,0.08);
+            position: relative;
+            outline: none;
+            opacity: 0;
+            transform: translateY(30px) scale(0.98);
+            animation: fadeInBtn 0.7s ease-out forwards;
+        }
+        .cat-btn:nth-child(1) { animation-delay: 0.2s; }
+        .cat-btn:nth-child(2) { animation-delay: 0.3s; }
+        .cat-btn:nth-child(3) { animation-delay: 0.4s; }
+        .cat-btn:nth-child(4) { animation-delay: 0.5s; }
+        .cat-btn:nth-child(5) { animation-delay: 0.6s; }
+        .cat-btn:nth-child(6) { animation-delay: 0.7s; }
+        @keyframes fadeInBtn {
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .cat-btn.selected, .cat-btn:focus {
+            background: linear-gradient(135deg, #fcb045, #fd1d1d);
+            color: #fff;
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(252, 176, 69, 0.18);
+        }
+        .cat-btn:hover {
+            background: linear-gradient(135deg, #fcb045, #fd1d1d);
+            color: #fff;
+            transform: scale(1.04);
+            box-shadow: 0 6px 20px rgba(252, 176, 69, 0.18);
+        }
+        .cat-icon {
+            font-size: 2rem;
+            margin-bottom: 2px;
+            filter: drop-shadow(0 2px 6px rgba(102,126,234,0.10));
+        }
+        .cat-label {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .cat-desc {
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: #f3e9ff;
+        }
+        .start-btn {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            padding: 16px 32px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            width: 100%;
+            max-width: 350px;
+            opacity: 1;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+        .start-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .start-btn:hover::before {
+            left: 100%;
+        }
+        .start-btn:disabled {
+            background: linear-gradient(45deg, #ccc, #999);
+            cursor: not-allowed;
+            opacity: 0.6;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .start-btn:hover:not(:disabled) {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(240, 147, 251, 0.4);
+        }
+        .start-btn:active:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(240, 147, 251, 0.3);
+        }
+        .back-btn-fixed {
+            position: fixed;
+            left: 18px;
+            bottom: 18px;
+            z-index: 1000;
+            background: rgba(35, 37, 38, 0.9);
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            padding: 10px 22px;
+            font-size: 1rem;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .back-btn-fixed:hover {
+            background: rgba(58, 28, 113, 0.9);
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+        }
+        @media (max-width: 600px) {
+            .category-card {
+                padding: 8px 2px 18px 2px;
+                margin: 8px 4px 32px 4px;
+            }
+            .category-grid {
+                grid-template-columns: 1fr;
+                gap: 4px;
+            }
+            .cat-btn {
+                font-size: 0.98rem;
+                padding: 10px 4px 8px 4px;
+                min-height: 54px;
+            }
+            .cat-icon {
+                font-size: 1.5rem;
+            }
+            .start-btn {
+                font-size: 0.98rem;
+                padding: 10px 0;
+                margin-bottom: 8px;
+            }
+            .mode-select {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px 4px 6px 4px;
+            }
+        }
+        /* Optional: scroll-down indicator */
+        .scroll-indicator {
+            display: none;
+            position: absolute;
+            left: 50%;
+            bottom: 12px;
+            transform: translateX(-50%);
+            font-size: 2rem;
+            color: #764ba2;
+            opacity: 0.5;
+            z-index: 100;
+            pointer-events: none;
+        }
+        @media (max-width: 600px) {
+            .scroll-indicator { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+    <!-- Animated background particles -->
+    <div class="particles">
+        <div class="particle" style="width: 20px; height: 20px; left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="width: 15px; height: 15px; left: 20%; animation-delay: 1s;"></div>
+        <div class="particle" style="width: 25px; height: 25px; left: 30%; animation-delay: 2s;"></div>
+        <div class="particle" style="width: 18px; height: 18px; left: 40%; animation-delay: 3s;"></div>
+        <div class="particle" style="width: 22px; height: 22px; left: 50%; animation-delay: 4s;"></div>
+        <div class="particle" style="width: 16px; height: 16px; left: 60%; animation-delay: 5s;"></div>
+        <div class="particle" style="width: 24px; height: 24px; left: 70%; animation-delay: 6s;"></div>
+        <div class="particle" style="width: 19px; height: 19px; left: 80%; animation-delay: 7s;"></div>
+        <div class="particle" style="width: 21px; height: 21px; left: 90%; animation-delay: 8s;"></div>
+    </div>
+    <div class="main-container">
+        <div class="category-card" id="category-card">
+            <h2>Select Interview Category</h2>
+            <p class="subtitle">Choose the type of questions you'd like to practice</p>
+            <form method="POST" id="category-form">
+                <div class="mode-select">
+                    <label for="time_limit">Time Limit:</label>
+                    <select name="time_limit" id="time_limit">
+                        <option value="300">5 min</option>
+                        <option value="600" selected>10 min</option>
+                        <option value="1200">20 min</option>
+                    </select>
+                    <label for="difficulty">Difficulty:</label>
+                    <select name="difficulty" id="difficulty">
+                        <option value="Easy">Easy</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+                    <label class="challenge-label"><input type="checkbox" name="challenge" value="1"> Challenge Mode</label>
+                </div>
+                <div class="category-grid">
+                    <button type="button" class="cat-btn" name="category" value="Technical"><span class="cat-icon">💻</span><span class="cat-label">Technical</span><span class="cat-desc">Programming & Tech Concepts</span></button>
+                    <button type="button" class="cat-btn" name="category" value="HR"><span class="cat-icon">🧑‍💼</span><span class="cat-label">HR</span><span class="cat-desc">General Interview Questions</span></button>
+                    <button type="button" class="cat-btn" name="category" value="Behavioral"><span class="cat-icon">🧠</span><span class="cat-label">Behavioral</span><span class="cat-desc">Past Experiences & Situations</span></button>
+                    <button type="button" class="cat-btn" name="category" value="Coding"><span class="cat-icon">💡</span><span class="cat-label">Coding</span><span class="cat-desc">Programming Problems & Logic</span></button>
+                    <button type="button" class="cat-btn" name="category" value="Case Studies"><span class="cat-icon">📊</span><span class="cat-label">Case Studies</span><span class="cat-desc">Problem-Solving Scenarios</span></button>
+                    <button type="button" class="cat-btn" name="category" value="Domain-Specific"><span class="cat-icon">🌐</span><span class="cat-label">Domain-Specific</span><span class="cat-desc">Industry & Technology Topics</span></button>
+                </div>
+                <input type="hidden" name="category" id="selected-category" />
+                <button type="submit" id="start-interview-btn" class="start-btn" disabled>Start Interview</button>
+            </form>
+        </div>
+    </div>
+    <a href="{{ url_for('login') }}" id="back-to-login-btn" class="back-btn-fixed">← Back</a>
+    <script>
+    // Parallax effect for particles
+    document.addEventListener('mousemove', function(e) {
+        const particles = document.querySelectorAll('.particle');
+        const x = e.clientX / window.innerWidth;
+        const y = e.clientY / window.innerHeight;
+        particles.forEach((particle, index) => {
+            const speed = (index + 1) * 0.3;
+            particle.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+        });
+    });
+    // Category button selection logic
+    const catBtns = document.querySelectorAll('.cat-btn');
+    const startBtn = document.getElementById('start-interview-btn');
+    const hiddenInput = document.getElementById('selected-category');
+    catBtns.forEach(btn => {
+        btn.onclick = function() {
+            catBtns.forEach(b => b.classList.remove('selected'));
+            this.classList.add('selected');
+            hiddenInput.value = this.value;
+            startBtn.disabled = false;
+        };
+    });
+    document.getElementById('category-form').onsubmit = function(e) {
+        if (!hiddenInput.value) {
+            e.preventDefault();
+            alert('Please select a category first!');
+        }
+    };
+    </script>
+</body>
+</html>

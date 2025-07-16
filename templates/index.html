@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Virtual Interview Practice Bot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        .particles {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; z-index: 1;
+        }
+        .particle {
+            position: absolute;
+            background: rgba(255,255,255,0.12);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%,100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        .main-container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+        .chat-card {
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.10);
+            padding: 32px 24px 24px 24px;
+            max-width: 540px;
+            width: 100%;
+            margin: 0 auto;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 1s ease-out 0.5s forwards;
+        }
+        @keyframes slideUp {
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .logout-link {
+            display: block;
+            text-align: right;
+            margin-bottom: 8px;
+        }
+        .welcome-user {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #833ab4;
+            margin-bottom: 8px;
+        }
+        .progress-bar-container {
+            width: 100%;
+            margin: 0 auto 12px auto;
+        }
+        .progress-bar-bg {
+            background: #e0e0e0;
+            border-radius: 8px;
+            width: 100%;
+            height: 16px;
+            position: relative;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg,#833ab4,#fd1d1d,#fcb045);
+            height: 100%;
+            width: 0%;
+            border-radius: 8px;
+            transition: width 0.4s;
+        }
+        .progress-label {
+            position: absolute;
+            left: 0; right: 0;
+            text-align: center;
+            font-size: 0.95rem;
+            color: #222;
+            font-weight: 600;
+            top: 0; line-height: 16px;
+        }
+        .timer {
+            position:fixed; top:24px; right:36px; z-index:2000;
+            background:linear-gradient(90deg,#833ab4,#fd1d1d,#fcb045);
+            color:#fff; font-weight:700; font-size:1.1rem;
+            border-radius:24px; padding:10px 28px;
+            box-shadow:0 4px 16px rgba(44,62,80,0.12);
+            border:none; outline:none;
+            animation: fadeInTimer 1s 0.7s both;
+        }
+        @keyframes fadeInTimer { from { opacity:0; } to { opacity:1; } }
+        .chat-title {
+            text-align:center;
+            font-size:1.3rem;
+            font-weight:900;
+            color:#3a1c71;
+            background:rgba(255,255,255,0.85);
+            padding: 4px 10px;
+            border-radius: 18px;
+            margin-bottom:6px;
+            letter-spacing:1px;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.10);
+        }
+        .chat-desc {
+            text-align:center;
+            color:#222;
+            font-size:0.98rem;
+            font-weight:500;
+            margin-bottom:8px;
+        }
+        #chat-box {
+            height: 220px;
+            overflow-y: auto;
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 12px 10px;
+            margin-bottom: 14px;
+            border: none;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.06);
+            font-size: 1.08rem;
+            transition: box-shadow 0.2s;
+        }
+        .bubble {
+            display: flex;
+            align-items: flex-end;
+            margin-bottom: 10px;
+            animation: fadeInBubble 0.5s;
+        }
+        @keyframes fadeInBubble { from { opacity:0; transform:translateY(10px);} to { opacity:1; transform:translateY(0);} }
+        .bubble.bot {
+            justify-content: flex-start;
+        }
+        .bubble.user {
+            justify-content: flex-end;
+        }
+        .bubble-content {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px 18px 18px 6px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: #fff;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(240,147,251,0.10);
+            position: relative;
+        }
+        .bubble.bot .bubble-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border-radius: 18px 18px 6px 18px;
+        }
+        .bubble .avatar {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem;
+            margin: 0 8px;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.10);
+        }
+        .bubble.user .avatar { background: #f5576c; color: #fff; }
+        .bubble.bot .avatar { background: #764ba2; color: #fff; }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        #user-input {
+            flex: 1;
+            padding: 8px 10px;
+            border-radius: 18px;
+            border: 1.5px solid #e1e5e9;
+            font-size: 0.98rem;
+            background: rgba(255,255,255,0.85);
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+        #user-input:focus {
+            border: 1.5px solid #764ba2;
+            outline: none;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.10);
+        }
+        #mic-btn {
+            background: #43e97b;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 30px; height: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+        #mic-btn:hover { background: #fd1d1d; transform: scale(1.08); }
+        #send-btn {
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+            color: #fff;
+            border: none;
+            border-radius: 18px;
+            padding: 8px 14px;
+            font-weight: 700;
+            font-size: 0.98rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.10);
+        }
+        #send-btn:hover { background: #fcb045; transform: scale(1.04); }
+        .back-btn-fixed {
+            position: fixed;
+            left: 18px;
+            bottom: 18px;
+            z-index: 1000;
+            background: rgba(35, 37, 38, 0.9);
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            padding: 10px 22px;
+            font-size: 1rem;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .back-btn-fixed:hover {
+            background: rgba(58, 28, 113, 0.9);
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+        }
+        /* Modal styles */
+        #sample-answers-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(44, 62, 80, 0.10);
+            padding: 32px 36px 24px 36px;
+            z-index: 3000;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        #sample-answers-modal.active { display: block; }
+        #sample-answers-modal h2 {
+            color: #3a1c71;
+            font-size: 1.3rem;
+            margin-bottom: 18px;
+            text-align: center;
+        }
+        #close-sample-answers {
+            background: #e53935;
+            color: #fff;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 24px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.10);
+        }
+        #close-sample-answers:hover {
+            background: #b71c1c;
+            transform: translateY(-2px) scale(1.04);
+        }
+        @media (max-width: 600px) {
+            .chat-card { 
+                padding: 14px 4px 32px 4px; max-width: 99vw; margin-bottom: 32px;
+             }
+            .chat-title { font-size: 1.08rem; padding: 4px 8px; }
+            .progress-bar-bg { height: 10px; }
+            .bubble-content { font-size: 1rem; padding: 8px 10px; }
+            #chat-box { height: 140px; font-size: 1rem; }
+            #send-btn { font-size: 1rem; padding: 8px 8px; }
+            #mic-btn { width: 28px; height: 28px; font-size: 1rem; }
+            #user-input { font-size: 1rem; padding: 8px 8px; }
+        }
+        .badge-area {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 10px;
+            min-height: 40px;
+        }
+        .milestone-badge {
+            background: linear-gradient(90deg, #fa8bff, #43e97b, #ff6a00);
+            color: #fff;
+            border-radius: 20px;
+            padding: 6px 18px;
+            font-size: 1rem;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.10);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            opacity: 0;
+            animation: fadeInBadge 0.7s forwards;
+        }
+        @keyframes fadeInBadge {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .progress-chart-container {
+            display: flex;
+            justify-content: center;
+            margin: 18px 0 10px 0;
+        }
+        .progress-chart {
+            width: 90px;
+            height: 90px;
+        }
+        /* Button ripple and hover effects */
+        .cta-animated-btn, #show-job-suggestions-btn, #show-sample-answers-btn, #copy-achievement-btn {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.15s, box-shadow 0.2s;
+        }
+        .cta-animated-btn:hover, #show-job-suggestions-btn:hover, #show-sample-answers-btn:hover, #copy-achievement-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(67,233,123,0.18);
+        }
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple-effect 0.5s linear;
+            background: rgba(67,233,123,0.3);
+            pointer-events: none;
+        }
+        @keyframes ripple-effect {
+            to { transform: scale(2.5); opacity: 0; }
+        }
+        /* LinkedIn icon and tooltip */
+        .linkedin-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            position: relative;
+        }
+        .linkedin-btn .linkedin-icon {
+            font-size: 1.2em;
+            color: #0077b5;
+        }
+        .linkedin-btn .tooltip {
+            visibility: hidden;
+            background: #222;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 4px 10px;
+            position: absolute;
+            z-index: 10;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.2s;
+            font-size: 0.95em;
+        }
+        .linkedin-btn:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            left: 0; top: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 4000;
+        }
+        /* Checkmark animation */
+        .checkmark {
+            display: inline-block;
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            background: #43e97b;
+            color: #fff;
+            text-align: center;
+            line-height: 24px;
+            font-size: 1.2em;
+            margin-left: 8px;
+            animation: pop-check 0.5s;
+        }
+        @keyframes pop-check {
+            0% { transform: scale(0.2); opacity: 0; }
+            60% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 32px; left: 50%;
+            transform: translateX(-50%);
+            background: #43e97b;
+            color: #fff;
+            padding: 12px 28px;
+            border-radius: 24px;
+            font-size: 1.05em;
+            font-weight: 700;
+            z-index: 5000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .toast.show { opacity: 1; pointer-events: auto; }
+        /* Animate job cards */
+        .job-card-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: jobCardIn 0.7s forwards;
+        }
+        @keyframes jobCardIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles">
+        <div class="particle" style="width: 20px; height: 20px; left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="width: 15px; height: 15px; left: 20%; animation-delay: 1s;"></div>
+        <div class="particle" style="width: 25px; height: 25px; left: 30%; animation-delay: 2s;"></div>
+        <div class="particle" style="width: 18px; height: 18px; left: 40%; animation-delay: 3s;"></div>
+        <div class="particle" style="width: 22px; height: 22px; left: 50%; animation-delay: 4s;"></div>
+        <div class="particle" style="width: 16px; height: 16px; left: 60%; animation-delay: 5s;"></div>
+        <div class="particle" style="width: 24px; height: 24px; left: 70%; animation-delay: 6s;"></div>
+        <div class="particle" style="width: 19px; height: 19px; left: 80%; animation-delay: 7s;"></div>
+        <div class="particle" style="width: 21px; height: 21px; left: 90%; animation-delay: 8s;"></div>
+    </div>
+    {% if user.is_authenticated %}
+    <div class="timer">⏰ Time Left: <span id="timer-value">{{ time_limit // 60 }}:00</span></div>
+    <div class="main-container">
+        <div class="chat-card">
+            <div class="logout-link"><a href="{{ url_for('logout') }}">Logout</a></div>
+            <div class="welcome-user">Welcome, {{ user.name }}!</div>
+            <div class="chat-title">Virtual Interview Practice Bot</div>
+            <div style="text-align:center; margin-bottom:8px;">
+                <span style="background:rgba(240,147,251,0.12); color:#764ba2; font-weight:600; border-radius:12px; padding:4px 14px; margin-right:8px;">Mode: {{ 'Challenge' if challenge else 'Standard' }}</span>
+                <span style="background:rgba(252,176,69,0.12); color:#fd1d1d; font-weight:600; border-radius:12px; padding:4px 14px;">Difficulty: {{ difficulty }}</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar" id="progress-bar"></div>
+                    <span class="progress-label" id="progress-label">0%</span>
+                </div>
+            </div>
+            <div class="chat-desc">Sharpen your interview skills with instant feedback. Type your answers below!</div>
+            <div class="badge-area" id="badge-area"></div>
+            <div id="chat-box"></div>
+            <div class="input-row">
+                <input type="text" id="user-input" placeholder="Type your answer..." autocomplete="off" />
+                <button id="mic-btn" title="Speak your answer">🎤</button>
+                <button id="send-btn">Send</button>
+            </div>
+        </div>
+    </div>
+    <!-- Sample Answers Modal -->
+    <div id="sample-answers-modal">
+        <h2>Sample Answers</h2>
+        <div id="sample-answers-content"></div>
+        <button id="close-sample-answers">Close</button>
+    </div>
+    <a href="{{ url_for('category') }}" class="back-btn-fixed">← Back</a>
+    <script>
+    let questionIndex = 0;
+    let lastCategory = "{{ session.get('category', '') }}";
+    let summaryData = null;
+    let timerInterval = null;
+    let timeLeft = {{ time_limit|default(600) }}; // Use selected time limit
+    let timerExpired = false;
+    let totalQuestions = 0;
+    let answeredQuestions = 0;
+
+    function startTimer() {
+        function updateTimer() {
+            let min = Math.floor(timeLeft / 60);
+            let sec = timeLeft % 60;
+            document.getElementById('timer-value').textContent = `${min.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timerExpired = true;
+                document.getElementById('user-input').disabled = true;
+                document.getElementById('send-btn').disabled = true;
+                document.getElementById('mic-btn').disabled = true;
+                addMessage('Bot', '⏰ Time is up! The interview session has ended.', 'bot');
+            }
+            timeLeft--;
+        }
+        updateTimer();
+        timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    // Voice output (Speech Synthesis)
+    function speak(text) {
+        if ('speechSynthesis' in window) {
+            const utter = new SpeechSynthesisUtterance(text);
+            window.speechSynthesis.speak(utter);
+        }
+    }
+
+    // Voice input (Speech Recognition)
+    let recognizing = false;
+    let recognition;
+    if ('webkitSpeechRecognition' in window) {
+        recognition = new webkitSpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+        recognition.onresult = function(event) {
+            let transcript = event.results[0][0].transcript;
+            document.getElementById('user-input').value = transcript;
+        };
+        recognition.onend = function() {
+            recognizing = false;
+            document.getElementById('mic-btn').style.background = '#43e97b';
+        };
+    }
+
+    document.getElementById('mic-btn').onclick = function() {
+        if (!recognition) return alert('Speech recognition not supported in this browser.');
+        if (recognizing) {
+            recognition.stop();
+            recognizing = false;
+            document.getElementById('mic-btn').style.background = '#43e97b';
+        } else {
+            recognition.start();
+            recognizing = true;
+            document.getElementById('mic-btn').style.background = '#fd1d1d';
+        }
+    };
+
+    function addMessage(sender, text, type) {
+        var chatBox = document.getElementById('chat-box');
+        let html = '';
+        if(sender === 'Bot' && type === true) {
+            // Question
+            const qId = 'q-' + Math.random().toString(36).substr(2, 9);
+            html = `<div class="bubble bot"><div class="avatar">🤖</div><div class="bubble-content" id="${qId}">${text}</div><button class="speak-btn" onclick="speak(document.getElementById('${qId}').textContent)" style="background: #43e97b; color: #fff; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 1.1rem; cursor: pointer; margin-left: 6px; vertical-align: middle;">🔊</button></div>`;
+        } else if(sender === 'Bot') {
+            html = `<div class="bubble bot"><div class="avatar">🤖</div><div class="bubble-content">${text}</div></div>`;
+        } else {
+            html = `<div class="bubble user"><div class="bubble-content">${text}</div><div class="avatar">🧑</div></div>`;
+        }
+        chatBox.innerHTML += html;
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function showBadge(icon, text) {
+        var badgeArea = document.getElementById('badge-area');
+        var badge = document.createElement('div');
+        badge.className = 'milestone-badge';
+        badge.innerHTML = `<span>${icon}</span> ${text}`;
+        badgeArea.appendChild(badge);
+        setTimeout(() => { badge.style.opacity = 0.7; }, 3500);
+        setTimeout(() => { badge.remove(); }, 5000);
+    }
+
+    // Track milestones
+    let milestones = { five: false, perfect: false, streak: false };
+    function checkMilestones(summary) {
+        if (!summary) return;
+        // 5 questions answered
+        if (!milestones.five && summary.length >= 5) {
+            showBadge('🏅', '5 Questions!');
+            milestones.five = true;
+        }
+        // Perfect score
+        if (!milestones.perfect && summary.every(item => item.score === 10)) {
+            showBadge('🌟', 'Perfect Score!');
+            milestones.perfect = true;
+        }
+        // Streak: 3+ answers in a row with score >=8
+        let streak = 0;
+        for (let i = 0; i < summary.length; i++) {
+            if (summary[i].score >= 8) streak++;
+            else streak = 0;
+            if (streak === 3 && !milestones.streak) {
+                showBadge('🔥', '3 Answer Streak!');
+                milestones.streak = true;
+            }
+        }
+    }
+
+    function showSummary(summary) {
+        var chatBox = document.getElementById('chat-box');
+        // Progress chart
+        let avg = summary.reduce((acc, cur) => acc + (cur.score || 0), 0) / summary.length;
+        let percent = Math.round((avg / 10) * 100);
+        chatBox.innerHTML += `
+            <div class="progress-chart-container">
+                <svg class="progress-chart" viewBox="0 0 36 36">
+                    <circle cx="18" cy="18" r="16" fill="none" stroke="#e0e0e0" stroke-width="4"/>
+                    <circle cx="18" cy="18" r="16" fill="none" stroke="#43e97b" stroke-width="4" stroke-dasharray="${percent},100" stroke-linecap="round"/>
+                    <text x="18" y="22" text-anchor="middle" font-size="10" fill="#764ba2" font-weight="bold">${avg.toFixed(2)}/10</text>
+                </svg>
+            </div>
+            <h3 style="text-align:center; color:#833ab4; margin-bottom:18px;">Interview Summary</h3>
+            ${summary.map((item, idx) => `
+                <div style="margin-bottom: 16px;">
+                    <b style="color:#fd1d1d;">Q${idx+1}:</b> ${item.question}<br>
+                    <b>Your answer:</b> <span style="color:#222;">${item.answer}</span><br>
+                    <b>Score:</b> <span style="color:#43e97b;">${item.score}/10</span><br>
+                    <b>Feedback:</b> <span style="color:#222;">${item.feedback}</span>
+                </div>
+            `).join('')}
+            <div style="text-align:center; margin: 12px 0 8px 0; font-size:1.1rem; font-weight:700; color:#833ab4;">
+                Average Score: ${avg.toFixed(2)}/10
+            </div>
+            <button id="show-sample-answers-btn" style="background: linear-gradient(90deg, #fa8bff, #43e97b, #ff6a00); color: #fff; border: none; padding: 10px 28px; border-radius: 24px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 10px; margin-bottom: 10px; transition: background 0.2s, transform 0.1s; box-shadow: 0 2px 8px rgba(44,62,80,0.10);">Show Sample Answers</button>
+            <button id="show-job-suggestions-btn" class="cta-animated-btn" style="background: linear-gradient(90deg, #43e97b, #fa8bff, #ff6a00); color: #fff; border: none; padding: 10px 28px; border-radius: 24px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 10px; margin-bottom: 10px; transition: background 0.2s, transform 0.1s; box-shadow: 0 2px 8px rgba(44,62,80,0.10);">Show Job Suggestions</button>
+            <div id="share-instructions" style="margin: 16px 0 6px 0; text-align:center;">
+                <div style="color:#764ba2; font-weight:600; font-size:1rem;">Want to share your achievement?</div>
+                <div style="font-size:0.97rem; color:#555; margin-bottom:6px;">Copy your achievement below and paste it into your LinkedIn post!</div>
+                <textarea id="achievement-message" style="width:90%; min-height:48px; border-radius:10px; border:1.5px solid #e1e5e9; padding:8px; font-size:1rem; margin-bottom:6px; resize:none;">I just completed a Virtual Interview Practice session (Avg Score: ${avg.toFixed(2)}/10)${summary.every(item => item.score === 10) ? ' and earned the Perfect Score badge' : summary.length >= 5 ? ' and earned the 5 Questions badge' : ''}! Try it yourself: ${window.location.origin}</textarea>
+                <button id="copy-achievement-btn" class="cta-animated-btn" style="background: linear-gradient(90deg,#43e97b,#fa8bff); color: #fff; border: none; border-radius: 18px; padding: 8px 18px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-bottom: 8px;">Copy Achievement</button>
+                <span id="copy-success" style="display:none; color:#43e97b; font-weight:600; margin-left:8px;">Copied!</span>
+            </div>
+            <a id="linkedin-share-btn" class="cta-animated-btn linkedin-btn" target="_blank" style="display:inline-block; margin: 10px auto 0 auto; background: linear-gradient(90deg,#0077b5,#43e97b,#fa8bff); color: #fff; font-weight: 700; border-radius: 24px; padding: 10px 28px; text-decoration: none; font-size: 1rem; align-items:center;" href="#">
+                <span class="linkedin-icon">&#xe800;</span> <!-- LinkedIn SVG or icon font -->
+                Share on LinkedIn
+                <span class="tooltip">Share your success on LinkedIn!</span>
+            </a>
+            <!-- Job Suggestions Modal -->
+            <div id="job-suggestions-modal" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(44, 62, 80, 0.10); padding: 32px 36px 24px 36px; z-index: 3000; max-width: 90vw; max-height: 80vh; overflow-y: auto;">
+                <h2 style="color: #3a1c71; font-size: 1.3rem; margin-bottom: 18px; text-align: center;">Job Suggestions</h2>
+                <div id="job-suggestions-content"></div>
+                <button id="close-job-suggestions" style="background: #e53935; color: #fff; border: none; padding: 10px 28px; border-radius: 24px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 10px; margin-bottom: 10px; transition: background 0.2s, transform 0.1s; box-shadow: 0 2px 8px rgba(44,62,80,0.10);">Close</button>
+            </div>
+        `;
+        document.getElementById('show-sample-answers-btn').onclick = function() {
+            showSampleAnswersModal();
+        };
+        document.getElementById('show-job-suggestions-btn').onclick = function() {
+            document.getElementById('job-suggestions-content').innerHTML = '<div style="text-align:center; color:#764ba2; font-weight:600;">Loading job suggestions...</div>';
+            document.getElementById('job-suggestions-modal').style.display = 'block';
+            fetch('/get_jobs')
+              .then(resp => resp.json())
+              .then(data => {
+                let html = '';
+                if (data.jobs && data.jobs.length > 0) {
+                  html += '<ul style="list-style: disc inside; padding-left: 0;">';
+                  data.jobs.forEach((job) => {
+                    html += `<li style='margin-bottom:10px;'><b>${job.title}</b> <span style='color:#555;'>@ ${job.company_name}</span><br><span style='color:#764ba2;'>${job.candidate_required_location || ''}</span></li>`;
+                  });
+                  html += '</ul>';
+                } else {
+                  html += '<div>No jobs found for your practice area right now.</div>';
+                }
+                document.getElementById('job-suggestions-content').innerHTML = html;
+              })
+              .catch(() => {
+                document.getElementById('job-suggestions-content').innerHTML = '<div style="color:#e53935; text-align:center; font-weight:600;">Failed to load job suggestions. Please try again later.</div>';
+              });
+        };
+        document.getElementById('close-job-suggestions').onclick = function() {
+            document.getElementById('job-suggestions-modal').style.display = 'none';
+        };
+        // LinkedIn share button logic
+        const avgScore = avg.toFixed(2);
+        const badge = (summary.every(item => item.score === 10)) ? 'Perfect Score badge' : (summary.length >= 5 ? '5 Questions badge' : '');
+        const shareText = `I just completed a Virtual Interview Practice session (Avg Score: ${avgScore}/10)${badge ? ' and earned the ' + badge : ''}! Try it yourself: ${window.location.origin}`;
+        const encodedShareText = encodeURIComponent(shareText);
+        const shareUrl = encodeURIComponent(window.location.origin);
+        document.getElementById('linkedin-share-btn').href = `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`;
+        // Set textarea value
+        document.getElementById('achievement-message').value = shareText;
+        // Copy to clipboard logic
+        document.getElementById('copy-achievement-btn').onclick = function() {
+            addRipple(e);
+            const textarea = document.getElementById('achievement-message');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            document.getElementById('copy-success').style.display = 'inline';
+            // Show checkmark
+            if (!document.getElementById('checkmark-done')) {
+                const check = document.createElement('span');
+                check.className = 'checkmark';
+                check.id = 'checkmark-done';
+                check.innerHTML = '&#10003;';
+                e.currentTarget.appendChild(check);
+                setTimeout(() => check.remove(), 1200);
+            }
+            // Show toast
+            let toast = document.getElementById('copy-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'copy-toast';
+                toast.className = 'toast';
+                toast.textContent = 'Achievement copied!';
+                document.body.appendChild(toast);
+            }
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 1800);
+            setTimeout(() => { document.getElementById('copy-success').style.display = 'none'; }, 1800);
+        };
+        checkMilestones(summary);
+    }
+
+    function showSampleAnswersModal() {
+        fetch('/get_sample_answers')
+            .then(response => response.json())
+            .then(data => {
+                let html = '';
+                if (data.samples && data.samples.length > 0) {
+                    data.samples.forEach(function(item, idx) {
+                        html += "<div><b>Q" + (idx+1) + ":</b> " + item.q + "<br><b>Sample Answer:</b> " + item.a + "</div><br>";
+                    });
+                } else {
+                    html = "No sample answers available for this category.";
+                }
+                document.getElementById('sample-answers-content').innerHTML = html;
+                document.getElementById('sample-answers-modal').style.display = 'block';
+            });
+    }
+
+    document.getElementById('close-sample-answers').onclick = function() {
+        document.getElementById('sample-answers-modal').style.display = 'none';
+    };
+
+    function updateProgressBar() {
+        let percent = totalQuestions > 0 ? Math.round((answeredQuestions/totalQuestions)*100) : 0;
+        document.getElementById('progress-bar').style.width = percent + '%';
+        document.getElementById('progress-label').textContent = percent + '%';
+    }
+
+    // On page load, get the first question
+    window.onload = function() {
+        startTimer();
+        fetch('/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({answer: '', question_index: -1})
+        })
+        .then(response => response.json())
+        .then(data => {
+            addMessage("Bot", data.next_question, true);
+            questionIndex = data.next_index;
+            // Get total questions for progress bar
+            fetch('/get_sample_answers')
+                .then(resp => resp.json())
+                .then(d => {
+                    totalQuestions = d.samples.length;
+                    answeredQuestions = 0;
+                    updateProgressBar();
+                });
+        });
+    };
+
+    document.getElementById('send-btn').onclick = function() {
+        if (timerExpired) return;
+        var input = document.getElementById('user-input');
+        var message = input.value.trim();
+        if (!message) return;
+        addMessage("You", message, false);
+        input.value = '';
+
+        fetch('/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({answer: message, question_index: questionIndex})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.feedback) addMessage("Bot", "Feedback: " + data.feedback, false);
+            if (data.score !== null) addMessage("Bot", "Score: " + data.score + "/10", false);
+            if (data.complete && data.summary) {
+                addMessage("Bot", data.next_question, true);
+                showSummary(data.summary);
+                questionIndex = null; // Prevent further input
+                answeredQuestions = totalQuestions;
+                updateProgressBar();
+                document.getElementById('user-input').disabled = true;
+                document.getElementById('send-btn').disabled = true;
+                document.getElementById('mic-btn').disabled = true;
+                checkMilestones(data.summary);
+            } else {
+                if (data.next_question) addMessage("Bot", data.next_question, true);
+                questionIndex = data.next_index;
+                answeredQuestions++;
+                updateProgressBar();
+            }
+        });
+    };
+
+    // Ripple effect for all animated buttons
+    function addRipple(e) {
+        const btn = e.currentTarget;
+        const circle = document.createElement('span');
+        circle.className = 'ripple';
+        const rect = btn.getBoundingClientRect();
+        circle.style.width = circle.style.height = Math.max(rect.width, rect.height) + 'px';
+        circle.style.left = (e.clientX - rect.left - rect.width/2) + 'px';
+        circle.style.top = (e.clientY - rect.top - rect.height/2) + 'px';
+        btn.appendChild(circle);
+        setTimeout(() => circle.remove(), 500);
+    }
+    document.querySelectorAll('.cta-animated-btn').forEach(btn => {
+        btn.addEventListener('click', addRipple);
+    });
+
+    // Confetti animation
+    function showConfetti() {
+        const confetti = document.createElement('canvas');
+        confetti.className = 'confetti';
+        document.body.appendChild(confetti);
+        const ctx = confetti.getContext('2d');
+        confetti.width = window.innerWidth;
+        confetti.height = window.innerHeight;
+        const pieces = Array.from({length: 60}, () => ({
+            x: Math.random()*confetti.width,
+            y: Math.random()*confetti.height/2,
+            r: Math.random()*8+4,
+            c: `hsl(${Math.random()*360},90%,60%)`,
+            s: Math.random()*2+1,
+            a: Math.random()*2*Math.PI
+        }));
+        let frame = 0;
+        function draw() {
+            ctx.clearRect(0,0,confetti.width,confetti.height);
+            for (const p of pieces) {
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.a);
+                ctx.beginPath();
+                ctx.arc(0,0,p.r,0,2*Math.PI);
+                ctx.fillStyle = p.c;
+                ctx.globalAlpha = 0.8;
+                ctx.fill();
+                ctx.restore();
+                p.y += p.s + Math.sin(frame/10+p.x/100)*0.5;
+                p.x += Math.sin(frame/10+p.y/100)*0.5;
+                if (p.y > confetti.height) p.y = -10;
+            }
+            frame++;
+            if (frame < 60) requestAnimationFrame(draw);
+            else confetti.remove();
+        }
+        draw();
+    }
+
+    // Show confetti on Copy Achievement and Show Job Suggestions
+    document.getElementById('copy-achievement-btn').addEventListener('click', showConfetti);
+    document.getElementById('show-job-suggestions-btn').addEventListener('click', showConfetti);
+
+    // LinkedIn icon font fallback
+    if (!document.querySelector('.linkedin-icon').textContent.trim()) {
+        document.querySelector('.linkedin-icon').innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="#0077b5"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.761 0 5-2.239 5-5v-14c0-2.761-2.239-5-5-5zm-11 19h-3v-10h3v10zm-1.5-11.268c-.966 0-1.75-.784-1.75-1.75s.784-1.75 1.75-1.75 1.75.784 1.75 1.75-.784 1.75-1.75 1.75zm13.5 11.268h-3v-5.604c0-1.337-.025-3.063-1.868-3.063-1.868 0-2.154 1.459-2.154 2.967v5.7h-3v-10h2.881v1.367h.041c.401-.761 1.381-1.563 2.841-1.563 3.039 0 3.6 2.001 3.6 4.601v5.595z"/></svg>';
+    }
+    </script>
+    {% else %}
+    <div class="main-container">
+        <div class="chat-card">
+            <h2>You must be logged in to access the interview bot.</h2>
+            <a href="{{ url_for('login') }}">Go to Login</a>
+        </div>
+    </div>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select Interview Type</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 25%, #0f3460 50%, #533483 75%, #7209b7 100%);
+            /* Animated gradient background */
+            overflow: hidden;
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+        }
+        .background-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #1a1a2e, #16213e, #0f3460, #533483, #7209b7);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            z-index: 0;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        .main-container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 10px;
+        }
+        .type-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.10);
+            padding: 40px 20px;
+            text-align: center;
+            max-width: 700px;
+            width: 100%;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 1s ease-out 0.5s forwards;
+        }
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.2rem;
+            font-weight: 400;
+        }
+        .type-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .type-btn {
+            background: rgba(255,255,255,0.9);
+            border: 3px solid transparent;
+            border-radius: 25px;
+            padding: 40px 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInType 0.8s ease-out forwards;
+        }
+        .type-btn:nth-child(1) { animation-delay: 0.3s; }
+        .type-btn:nth-child(2) { animation-delay: 0.5s; }
+        @keyframes fadeInType {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .type-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+        .type-btn.selected {
+            border-color: #f093fb;
+            background: linear-gradient(135deg, rgba(240, 147, 251, 0.1), rgba(245, 87, 108, 0.1));
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(240, 147, 251, 0.3);
+        }
+        .type-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+        }
+        .type-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .type-desc {
+            font-size: 1.1rem;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .type-features {
+            list-style: none;
+            text-align: left;
+            color: #555;
+        }
+        .type-features li {
+            padding: 5px 0;
+            position: relative;
+            padding-left: 25px;
+        }
+        .type-features li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        .continue-btn {
+            margin-top: 30px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            padding: 16px 40px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            width: 100%;
+            max-width: 350px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+        .continue-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .continue-btn:hover::before {
+            left: 100%;
+        }
+        .continue-btn:disabled {
+            background: linear-gradient(45deg, #ccc, #999);
+            cursor: not-allowed;
+            opacity: 0.6;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .continue-btn:hover:not(:disabled) {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(240, 147, 251, 0.4);
+        }
+        .back-btn-fixed {
+            position: fixed;
+            left: 18px;
+            bottom: 18px;
+            z-index: 1000;
+            background: rgba(35, 37, 38, 0.9);
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            padding: 10px 22px;
+            font-size: 1rem;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .back-btn-fixed:hover {
+            background: rgba(58, 28, 113, 0.9);
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+        }
+        @media (max-width: 768px) {
+            .type-options {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .type-btn {
+                padding: 30px 20px;
+            }
+            .type-icon {
+                font-size: 3rem;
+            }
+            .type-title {
+                font-size: 1.5rem;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+    <!-- Animated background particles -->
+    <div class="particles">
+        <div class="particle" style="width: 20px; height: 20px; left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="width: 15px; height: 15px; left: 20%; animation-delay: 1s;"></div>
+        <div class="particle" style="width: 25px; height: 25px; left: 30%; animation-delay: 2s;"></div>
+        <div class="particle" style="width: 18px; height: 18px; left: 40%; animation-delay: 3s;"></div>
+        <div class="particle" style="width: 22px; height: 22px; left: 50%; animation-delay: 4s;"></div>
+        <div class="particle" style="width: 16px; height: 16px; left: 60%; animation-delay: 5s;"></div>
+        <div class="particle" style="width: 24px; height: 24px; left: 70%; animation-delay: 6s;"></div>
+        <div class="particle" style="width: 19px; height: 19px; left: 80%; animation-delay: 7s;"></div>
+        <div class="particle" style="width: 21px; height: 21px; left: 90%; animation-delay: 8s;"></div>
+    </div>
+    
+    <div class="main-container">
+        <div class="type-card">
+            <h1>Choose Interview Type</h1>
+            <p class="subtitle">Select how you'd like to practice your interview skills</p>
+            
+            <form method="POST" id="type-form">
+                <div class="type-options">
+                    <div class="type-btn" data-type="written">
+                        <div class="type-icon">📝</div>
+                        <div class="type-title">Written Interview</div>
+                        <div class="type-desc">Type your answers and get instant feedback</div>
+                        <ul class="type-features">
+                            <li>Text-based responses</li>
+                            <li>Grammar and sentiment analysis</li>
+                            <li>Instant scoring</li>
+                            <li>Perfect for preparation</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="type-btn" data-type="video">
+                        <div class="type-icon">📹</div>
+                        <div class="type-title">Video Interview</div>
+                        <div class="type-desc">Practice with live video and verbal responses</div>
+                        <ul class="type-features">
+                            <li>Live webcam interaction</li>
+                            <li>Voice-based responses</li>
+                            <li>Real interview experience</li>
+                            <li>Build confidence</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <input type="hidden" name="interview_type" id="selected-type" />
+                <button type="submit" id="continue-btn" class="continue-btn" disabled>Continue</button>
+            </form>
+        </div>
+    </div>
+    
+    <a href="{{ url_for('login') }}" class="back-btn-fixed">← Back</a>
+    
+    <script>
+        // Parallax effect for particles
+        document.addEventListener('mousemove', function(e) {
+            const particles = document.querySelectorAll('.particle');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            particles.forEach((particle, index) => {
+                const speed = (index + 1) * 0.3;
+                particle.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+            });
+        });
+        
+        // Type selection logic
+        const typeBtns = document.querySelectorAll('.type-btn');
+        const continueBtn = document.getElementById('continue-btn');
+        const hiddenInput = document.getElementById('selected-type');
+        
+        typeBtns.forEach(btn => {
+            btn.onclick = function() {
+                typeBtns.forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                hiddenInput.value = this.dataset.type;
+                continueBtn.disabled = false;
+            };
+        });
+        
+        document.getElementById('type-form').onsubmit = function(e) {
+            if (!hiddenInput.value) {
+                e.preventDefault();
+                alert('Please select an interview type first!');
+            }
+        };
+    </script>
+</body>
+</html>

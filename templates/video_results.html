@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Video Interview Results - {{ user.name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        .score-summary {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+        }
+        .score-summary h2 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        .score-summary p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .section {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .section h3 {
+            color: #333;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .question-item {
+            background: rgba(102, 126, 234, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        .question-item h4 {
+            color: #333;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .question-item p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        .score-badge {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .feedback-badge {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .sample-answers {
+            background: rgba(245, 87, 108, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #f5576c;
+        }
+        .sample-answers h4 {
+            color: #333;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .sample-answers p {
+            color: #666;
+            line-height: 1.6;
+        }
+        .jobs-section {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+        }
+        .job-item {
+            background: rgba(102, 126, 234, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        .job-item h4 {
+            color: #333;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .job-item p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .job-link {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        .job-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        .linkedin-share {
+            background: linear-gradient(45deg, #0077b5, #005885);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+        .linkedin-share:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 119, 181, 0.4);
+        }
+        .share-section {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        .share-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .share-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .share-btn-linkedin {
+            background: linear-gradient(45deg, #0077b5, #005885);
+            color: white;
+        }
+        .share-btn-linkedin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 119, 181, 0.4);
+        }
+        .share-btn-twitter {
+            background: linear-gradient(45deg, #1da1f2, #0d8bd9);
+            color: white;
+        }
+        .share-btn-twitter:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(29, 161, 242, 0.4);
+        }
+        .share-btn-copy {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        .share-btn-copy:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        .job-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            align-items: center;
+        }
+        .job-salary {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .job-type {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .job-meta {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .actions {
+            text-align: center;
+            margin-top: 40px;
+        }
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+        }
+        .btn-secondary:hover {
+            box-shadow: 0 8px 25px rgba(240, 147, 251, 0.4);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .stat-card h3 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-card p {
+            color: #666;
+            font-size: 1rem;
+        }
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 20px;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .score-summary h2 {
+                font-size: 2rem;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 Video Interview Results</h1>
+            <p>Congratulations on completing your video interview!</p>
+        </div>
+        
+        <div class="score-summary">
+            <h2>{{ "%.1f"|format(avg_score) }}/10</h2>
+            <p>Your Overall Interview Score</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>{{ summary|length }}</h3>
+                <p>Questions Answered</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ time_taken }}</h3>
+                <p>Time Taken</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ interview_type }}</h3>
+                <p>Interview Type</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ difficulty }}</h3>
+                <p>Difficulty Level</p>
+            </div>
+        </div>
+        
+        <div class="content-grid">
+            <div class="section">
+                <h3>📝 Your Performance Summary</h3>
+                {% for item in summary %}
+                <div class="question-item">
+                    <h4>Q{{ loop.index }}: {{ item.question }}</h4>
+                    <p><strong>Your Answer:</strong> {{ item.answer }}</p>
+                    <div style="margin-top: 10px;">
+                        <span class="score-badge">{{ item.score }}/10</span>
+                        <span class="feedback-badge">{{ item.feedback }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="section">
+                <h3>💡 Sample Answers</h3>
+                {% for sample in samples %}
+                <div class="sample-answers">
+                    <h4>{{ sample.q }}</h4>
+                    <p>{{ sample.a }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Share Your Results -->
+        <div class="share-section">
+            <h3>🎉 Share Your Achievement!</h3>
+            <p>Showcase your interview success and connect with potential employers</p>
+            <div class="share-buttons">
+                <button class="share-btn share-btn-linkedin" onclick="shareOnLinkedIn()">📊 Share on LinkedIn</button>
+                <button class="share-btn share-btn-twitter" onclick="shareOnTwitter()">🐦 Share on Twitter</button>
+                <button class="share-btn share-btn-copy" onclick="copyToClipboard()">📋 Copy Results</button>
+            </div>
+        </div>
+        
+        {% if jobs %}
+        <div class="jobs-section">
+            <h3>💼 Recommended Jobs for {{ category }}</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                {% for job in jobs %}
+                <div class="job-item">
+                    <div class="job-header">
+                        <h4>{{ job.title }}</h4>
+                        <div class="job-meta">
+                            <span class="job-type">{{ job.job_type or 'Full-time' }}</span>
+                            <span class="job-salary">{{ job.salary_range or 'Competitive' }}</span>
+                        </div>
+                    </div>
+                    <p><strong>Company:</strong> {{ job.company_name }}</p>
+                    <p><strong>Location:</strong> {{ job.candidate_required_location }}</p>
+                    <div class="job-actions">
+                        <a href="{{ job.url }}" target="_blank" class="job-link">View Job</a>
+                        <a href="https://www.linkedin.com/jobs/search/?keywords={{ job.title|urlencode }}&location={{ job.candidate_required_location|urlencode }}" target="_blank" class="linkedin-share">Find Similar on LinkedIn</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="actions">
+            <a href="{{ url_for('interview_type') }}" class="btn">Take Another Interview</a>
+            <a href="{{ url_for('resume_review') }}" class="btn btn-secondary">Review Resume</a>
+        </div>
+    </div>
+    
+    <script>
+        function shareOnLinkedIn() {
+            const shareText = `🎉 Just completed my video interview! Scored {{ "%.1f"|format(avg_score) }}/10 overall and answered {{ summary|length }} questions. Ready to take on new challenges! #InterviewSuccess #JobReady #TechCareers #ProfessionalDevelopment`;
+            const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}&title=${encodeURIComponent(shareText)}`;
+            window.open(linkedinUrl, '_blank', 'width=600,height=600');
+        }
+        
+        function shareOnTwitter() {
+            const shareText = `🎯 Aced my video interview! Scored {{ "%.1f"|format(avg_score) }}/10 and ready for the next opportunity! #InterviewSuccess #JobSearch #TechCareers`;
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(window.location.href)}`;
+            window.open(twitterUrl, '_blank', 'width=600,height=400');
+        }
+        
+        function copyToClipboard() {
+            const resultsText = `🎉 Video Interview Results Summary\n\n` +
+                               `Overall Score: {{ "%.1f"|format(avg_score) }}/10\n` +
+                               `Questions Answered: {{ summary|length }}\n` +
+                               `Time Taken: {{ time_taken }}\n` +
+                               `Interview Type: {{ interview_type }}\n` +
+                               `Difficulty Level: {{ difficulty }}\n\n` +
+                               `Ready for new opportunities! 🚀\n` +
+                               `#InterviewSuccess #JobReady #TechCareers`;
+            
+            navigator.clipboard.writeText(resultsText).then(() => {
+                // Change button text temporarily to show success
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✅ Copied!';
+                btn.style.background = 'linear-gradient(45deg, #28a745, #20c997)';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = 'linear-gradient(45deg, #667eea, #764ba2)';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy to clipboard. Please try again.');
+            });
+        }
+    </script>
+</body>
+</html>
